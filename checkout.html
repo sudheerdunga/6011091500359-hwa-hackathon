@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Checkout | Luma</title>
+<title>Checkout | Scent-Trail</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <header>
   <div class="container inner">
-    <div class="logo"><div class="mark">L</div><div>Luma</div></div>
+    <div class="logo"><div class="mark">S</div><div>Scent-Trail</div></div>
     <nav class="nav">
       <a href="index.html">Store</a>
       <a href="cart.html">Cart</a>
@@ -44,7 +44,7 @@
       <div class="hidden confirmation" id="confirmation">
         <div class="check">&#10003;</div>
         <h2>Order placed</h2>
-        <p>Thank you! Your order has been received.</p>
+        <p>Thank you! Your foraging labyrinth order has been received.</p>
         <div class="order-id" id="order-id">Order #0000</div>
         <p style="margin-top:1.5rem;color:var(--muted);font-size:0.9rem;">A confirmation email has been sent to <span id="confirm-email"></span>.</p>
         <p style="margin-top:1rem;"><a href="index.html" style="color:var(--brand);font-weight:700;">&larr; Back to store</a></p>
@@ -54,12 +54,12 @@
 </section>
 
 <footer>
-  <div class="container">Luma Storefront &middot; Single product, built to order.</div>
+  <div class="container">Scent-Trail Storefront &middot; Foraging labyrinth, built to order.</div>
 </footer>
 
 <script src="js/store.js"></script>
 <script>
-const { getCart, getCartTotal, dollars, load, clear } = STORE;
+const { getCart, getCartTotal, dollars, load, clear, product, variantLabel, variantPrice } = STORE;
 
 const form = document.getElementById('checkout-form');
 const summaryItems = document.getElementById('summary-items');
@@ -94,16 +94,12 @@ const renderSummary = () => {
   const cart = getCart();
   if (!cart.length) { location.href = 'cart.html'; return; }
   const item = cart[0];
-  const addonNames = item.addOnIds.map(id => {
-    const a = STORE.addOns.find(x => x.id === id);
-    return a ? `+ ${a.name} (${dollars(a.price)} each)` : id;
-  }).join('; ');
   summaryItems.innerHTML = `
     <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
-      <span>${STORE.product.name} &times; ${item.qty}</span>
-      <span>${dollars(STORE.product.price * item.qty)}</span>
+      <span>${product.name} &times; ${item.qty}</span>
+      <span>${dollars(variantPrice(item.base, item.size, item.scent) * item.qty)}</span>
     </div>
-    ${addonNames ? `<div style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem;">${addonNames}</div>` : ''}
+    <div style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem;">${variantLabel(item)}</div>
   `;
   summaryTotal.textContent = dollars(getCartTotal());
 };
@@ -126,11 +122,13 @@ form.addEventListener('submit', async (e) => {
       address: fd.get('address').trim()
     },
     items: getCart().map(i => ({
-      productId: i.productId,
-      name: STORE.product.name,
+      productId: product.id,
+      name: product.name,
       qty: i.qty,
-      unitPrice: STORE.product.price,
-      addOnIds: i.addOnIds
+      base: i.base,
+      size: i.size,
+      scent: i.scent,
+      unitPrice: variantPrice(i.base, i.size, i.scent)
     })),
     total: getCartTotal()
   };

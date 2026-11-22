@@ -6,12 +6,9 @@ const ORDERS_FILE = process.env.VERCEL === '1'
   : path.join(__dirname, 'orders.json');
 
 // Source of truth for pricing (mirrors the frontend store).
-const PRODUCT_PRICE = 8900;
-const ADDON_PRICES = {
-  warranty: 1900,
-  bulb: 1200,
-  mount: 2400
-};
+const BASE_PRICES = { starter: 3400, standard: 4900, extended: 6900 };
+const SIZE_PRICES = { small: 0, medium: 800, large: 1500 };
+const SCENT_PRICES = { peanut: 800, broth: 800, herb: 800, variety: 2200 };
 
 const readOrders = () => {
   try {
@@ -57,7 +54,6 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify({ error: 'Invalid JSON body.' }));
   }
 
-  // Validation
   if (!order || typeof order !== 'object') {
     res.statusCode = 400;
     return res.end(JSON.stringify({ error: 'Order body must be an object.' }));
@@ -94,25 +90,24 @@ module.exports = async (req, res) => {
       res.statusCode = 400;
       return res.end(JSON.stringify({ error: 'Each item needs productId and name.' }));
     }
+    if (!it.base || !(it.base in BASE_PRICES)) {
+      res.statusCode = 400;
+      return res.end(JSON.stringify({ error: 'Each item needs a valid base tier.' }));
+    }
+    if (!it.size || !(it.size in SIZE_PRICES)) {
+      res.statusCode = 400;
+      return res.end(JSON.stringify({ error: 'Each item needs a valid size/pace.' }));
+    }
+    if (!it.scent || !(it.scent in SCENT_PRICES)) {
+      res.statusCode = 400;
+      return res.end(JSON.stringify({ error: 'Each item needs a valid scent pack.' }));
+    }
     const qty = Number(it.qty);
     if (!qty || qty < 1 || qty > 99) {
       res.statusCode = 400;
       return res.end(JSON.stringify({ error: 'Each item qty must be 1-99.' }));
     }
-    // Authoritative server-side pricing; ignore client-supplied unitPrice.
-    computed += PRODUCT_PRICE * qty;
-    if (Array.isArray(it.addOnIds)) {
-      for (const aid of it.addOnIds) {
-        if (typeof aid !== 'string' || !aid || !(aid in ADDON_PRICES)) {
-          res.statusCode = 400;
-          return res.end(JSON.stringify({ error: 'Invalid addOnIds.' }));
-        }
-        computed += ADDON_PRICES[aid] * qty;
-      }
-    } else {
-      res.statusCode = 400;
-      return res.end(JSON.stringify({ error: 'Each item addOnIds must be an array.' }));
-    }
+    computed += (BASE_PRICES[it.base] + SIZE_PRICES[it.size] + SCENT_PRICES[it.scent]) * qty;
   }
 
   const providedTotal = Number(total);
@@ -121,7 +116,7 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify({ error: 'Order total does not match itemized total.' }));
   }
 
-  const orderId = 'LUMA-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+  const orderId = 'SCNT-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
   const record = {
     orderId,
     customer: { name: String(name).trim(), email: String(email).trim(), address: String(address).trim() },
@@ -129,8 +124,10 @@ module.exports = async (req, res) => {
       productId: it.productId,
       name: it.name,
       qty: Number(it.qty),
-      unitPrice: PRODUCT_PRICE,
-      addOnIds: it.addOnIds
+      base: it.base,
+      size: it.size,
+      scent: it.scent,
+      unitPrice: BASE_PRICES[it.base] + SIZE_PRICES[it.size] + SCENT_PRICES[it.scent]
     })),
     total: computed,
     status: 'confirmed',
