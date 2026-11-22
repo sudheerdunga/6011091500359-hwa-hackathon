@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout | Luma</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <div class="container inner">
+    <div class="logo"><div class="mark">L</div><div>Luma</div></div>
+    <nav class="nav">
+      <a href="index.html">Store</a>
+      <a href="cart.html">Cart</a>
+    </nav>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="row row-2">
+      <div>
+        <h2>Checkout</h2>
+        <form id="checkout-form" novalidate>
+          <div class="order-summary" style="margin-bottom:1.5rem;">
+            <h3 style="margin-bottom:0.75rem;">Order summary</h3>
+            <div id="summary-items"></div>
+            <div style="border-top:1px solid var(--line);padding-top:0.75rem;margin-top:0.75rem;display:flex;justify-content:space-between;font-weight:800;">
+              <span>Total</span>
+              <span id="summary-total">$0.00</span>
+            </div>
+          </div>
+          <label>Full name <input name="name" required /></label>
+          <span class="field-error" id="err-name">Please enter your full name.</span>
+          <label>Email <input name="email" type="email" required /></label>
+          <span class="field-error" id="err-email">Please enter a valid email address.</span>
+          <label>Shipping address <input name="address" required /></label>
+          <span class="field-error" id="err-address">Please enter your shipping address.</span>
+          <button type="submit" id="place-order" class="btn-primary" style="width:100%;margin-top:1rem;">Place order</button>
+          <p id="form-msg" style="margin-top:0.75rem;font-size:0.9rem;color:var(--muted);"></p>
+        </form>
+      </div>
+      <div class="hidden confirmation" id="confirmation">
+        <div class="check">&#10003;</div>
+        <h2>Order placed</h2>
+        <p>Thank you! Your order has been received.</p>
+        <div class="order-id" id="order-id">Order #0000</div>
+        <p style="margin-top:1.5rem;color:var(--muted);font-size:0.9rem;">A confirmation email has been sent to <span id="confirm-email"></span>.</p>
+        <p style="margin-top:1rem;"><a href="index.html" style="color:var(--brand);font-weight:700;">&larr; Back to store</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">Luma Storefront &middot; Single product, built to order.</div>
+</footer>
+
+<script src="js/store.js"></script>
+<script>
+const { getCart, getCartTotal, dollars, load, clear } = STORE;
+
+const form = document.getElementById('checkout-form');
+const summaryItems = document.getElementById('summary-items');
+const summaryTotal = document.getElementById('summary-total');
+const confirmation = document.getElementById('confirmation');
+const orderIdEl = document.getElementById('order-id');
+const confirmEmail = document.getElementById('confirm-email');
+const formMsg = document.getElementById('form-msg');
+const placeBtn = document.getElementById('place-order');
+
+const errors = { name: document.getElementById('err-name'), email: document.getElementById('err-email'), address: document.getElementById('err-address') };
+
+const showError = (field, show) => {
+  errors[field].style.display = show ? 'block' : 'none';
+  form.querySelector('[name="'+field+'"]').style.borderColor = show ? 'var(--danger)' : '';
+};
+
+const validate = () => {
+  let ok = true;
+  const fd = new FormData(form);
+  const name = (fd.get('name')||'').trim();
+  const email = (fd.get('email')||'').trim();
+  const address = (fd.get('address')||'').trim();
+  showError('name', !name);
+  showError('email', !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+  showError('address', !address);
+  if (!name || !email || !address) ok = false;
+  return ok;
+};
+
+const renderSummary = () => {
+  const cart = getCart();
+  if (!cart.length) { location.href = 'cart.html'; return; }
+  const item = cart[0];
+  const addonNames = item.addOnIds.map(id => {
+    const a = STORE.addOns.find(x => x.id === id);
+    return a ? `+ ${a.name} (${dollars(a.price)} each)` : id;
+  }).join('; ');
+  summaryItems.innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+      <span>${STORE.product.name} &times; ${item.qty}</span>
+      <span>${dollars(STORE.product.price * item.qty)}</span>
+    </div>
+    ${addonNames ? `<div style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem;">${addonNames}</div>` : ''}
+  `;
+  summaryTotal.textContent = dollars(getCartTotal());
+};
+
+load();
+renderSummary();
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  formMsg.textContent = '';
+  formMsg.style.color = '';
+  Object.values(errors).forEach(el => el.style.display = 'none');
+  if (!validate()) return;
+
+  const fd = new FormData(form);
+  const order = {
+    customer: {
+      name: fd.get('name').trim(),
+      email: fd.get('email').trim(),
+      address: fd.get('address').trim()
+    },
+    items: getCart().map(i => ({
+      productId: i.productId,
+      name: STORE.product.name,
+      qty: i.qty,
+      unitPrice: STORE.product.price,
+      addOnIds: i.addOnIds
+    })),
+    total: getCartTotal()
+  };
+
+  placeBtn.disabled = true;
+  placeBtn.textContent = 'Placing order...';
+
+  try {
+    const res = await fetch('/api/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Order failed');
+
+    formMsg.style.color = 'var(--success)';
+    formMsg.textContent = 'Order confirmed!';
+    placeBtn.style.display = 'none';
+    form.style.display = 'none';
+    confirmation.classList.remove('hidden');
+    orderIdEl.textContent = 'Order #' + data.orderId;
+    confirmEmail.textContent = order.customer.email;
+    clear();
+  } catch (err) {
+    placeBtn.disabled = false;
+    placeBtn.textContent = 'Place order';
+    formMsg.style.color = 'var(--danger)';
+    formMsg.textContent = err.message || 'Could not place order. Try again.';
+  }
+});
+</script>
+</body>
+</html>

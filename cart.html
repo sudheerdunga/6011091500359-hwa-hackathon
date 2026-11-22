@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Cart | Luma</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <div class="container inner">
+    <div class="logo"><div class="mark">L</div><div>Luma</div></div>
+    <nav class="nav">
+      <a href="index.html">Store</a>
+      <a href="cart.html" class="nav-link" style="color:var(--brand)">Cart <span class="cart-badge" id="badge">0</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2>Your cart</h2>
+    <div id="cart-container">
+      <div class="empty-state" id="empty-state">
+        <h3>Your cart is empty</h3>
+        <p>Add the Luma Smart Desk Lamp to get started.</p>
+        <p style="margin-top:1rem;"><a href="index.html" style="color:var(--brand);font-weight:700;">&larr; Back to store</a></p>
+      </div>
+      <div id="cart-items" class="hidden"></div>
+      <div class="cart-footer hidden" id="cart-footer">
+        <div class="total">Total: <span id="cart-total">$0.00</span></div>
+        <a href="checkout.html" id="checkout-btn" class="btn-primary" style="text-decoration:none;">Proceed to checkout</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">Luma Storefront &middot; Single product, built to order.</div>
+</footer>
+
+<script src="js/store.js"></script>
+<script>
+const { getCart, getCartTotal, dollars, setQty, remove, load, subscribe, itemLineTotal } = STORE;
+
+const container = document.getElementById('cart-items');
+const empty = document.getElementById('empty-state');
+const footer = document.getElementById('cart-footer');
+const totalEl = document.getElementById('cart-total');
+const badgeEl = document.getElementById('badge');
+
+const render = () => {
+  const cart = getCart();
+  badgeEl.textContent = STORE.getCartCount();
+  if (!cart.length) {
+    empty.classList.remove('hidden');
+    footer.classList.add('hidden');
+    container.innerHTML = '';
+    return;
+  }
+  empty.classList.add('hidden');
+  footer.classList.remove('hidden');
+  container.innerHTML = cart.map((item, i) => {
+    const line = itemLineTotal(item);
+    const addonNames = item.addOnIds.map(id => {
+      const a = STORE.addOns.find(x => x.id === id);
+      return a ? a.name : id;
+    }).join(', ');
+    return `
+      <div class="cart-item">
+        <div class="img-placeholder" style="width:80px;height:80px;">
+          <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
+            <rect x="44" y="78" width="12" height="16" fill="#9ca3af"/>
+            <path d="M30 62 Q50 20 70 62" stroke="#9ca3af" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <circle cx="50" cy="62" r="14" fill="#fbbf24" opacity="0.9"/>
+          </svg>
+        </div>
+        <div class="info">
+          <h4>${STORE.product.name}</h4>
+          <div style="color:var(--brand);font-weight:800;">${dollars(STORE.product.price)} each</div>
+          ${addonNames ? `<div class="addons">+ ${addonNames}</div>` : ''}
+        </div>
+        <div class="qty">
+          <button type="button" data-i="${i}" data-delta="-1">&minus;</button>
+          <span>${item.qty}</span>
+          <button type="button" data-i="${i}" data-delta="1">&plus;</button>
+        </div>
+        <button type="button" class="remove" data-i="${i}">Remove</button>
+        <div style="font-weight:700;margin-left:auto;">${dollars(line)}</div>
+      </div>
+    `;
+  }).join('');
+
+  totalEl.textContent = dollars(getCartTotal());
+  document.querySelectorAll('[data-delta]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.getAttribute('data-i'), 10);
+      const delta = parseInt(btn.getAttribute('data-delta'), 10);
+      const cart = getCart();
+      setQty(i, Math.max(1, cart[i].qty + delta));
+    });
+  });
+  document.querySelectorAll('.remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.getAttribute('data-i'), 10);
+      remove(i);
+    });
+  });
+};
+
+load();
+render();
+subscribe(render);
+</script>
+</body>
+</html>

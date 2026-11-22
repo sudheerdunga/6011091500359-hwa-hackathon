@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luma Smart Desk Lamp | The Smart Desk Lamp</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <div class="container inner">
+    <div class="logo"><div class="mark">L</div><div>Luma</div></div>
+    <nav class="nav">
+      <a href="#features">Features</a>
+      <a href="#addons">Add-ons</a>
+      <a href="cart.html" class="nav-link">Cart <span class="cart-badge" id="badge">0</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="img-placeholder" id="lamp-img" style="height:340px;width:340px;max-width:340px;margin:0 auto 1.5rem;">
+      <svg width="150" height="150" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="44" y="78" width="12" height="16" fill="#9ca3af"/>
+        <path d="M30 62 Q50 20 70 62" stroke="#9ca3af" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <circle cx="50" cy="62" r="14" fill="#fbbf24" opacity="0.9"/>
+        <circle cx="50" cy="62" r="8" fill="#fef3c7"/>
+      </svg>
+      <div style="margin-top:10px;font-weight:700;color:#111827;">Luma Smart Desk Lamp</div>
+    </div>
+    <h1>One lamp. Every kind of light.</h1>
+    <p>Desk lighting reimagined: wireless charging in the base, touch dimming, warm-to-cool tones, and memory presets.</p>
+    <div class="price">$89.00 <small>/lamp</small></div>
+    <div style="margin-top:1.5rem;">
+      <button class="btn-primary" id="add-to-cart">Add to cart</button>
+      <button id="add-addons" style="margin-left:0.75rem;background:#fff;border:1px solid var(--line);color:var(--ink);padding:0.9rem 1.25rem;border-radius:var(--radius);font-weight:700;">Choose add-ons</button>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="section">
+  <div class="container">
+    <h2>Features</h2>
+    <p class="sub">Thoughtful details for a better workspace.</p>
+    <ul class="features grid" id="features-list"></ul>
+  </div>
+</section>
+
+<section id="addons" class="section">
+  <div class="container">
+    <h2>Add-ons</h2>
+    <p class="sub">Pair your lamp with optional extras.</p>
+    <div class="grid grid-cols-2" id="addons-list"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">Luma Storefront &middot; Single product, built to order.</div>
+</footer>
+
+<script src="js/store.js"></script>
+<script>
+const { product, addOns, dollars, addOrUpdate, getCartCount, load } = STORE;
+
+document.getElementById('add-to-cart').addEventListener('click', () => {
+  addOrUpdate([]);
+  updateBadge();
+  const btn = document.getElementById('add-to-cart');
+  const old = btn.textContent;
+  btn.textContent = 'Added!';
+  setTimeout(() => btn.textContent = old, 1200);
+});
+
+document.getElementById('add-addons').addEventListener('click', () => {
+  const panel = document.getElementById('addons-list');
+  panel.scrollIntoView({ behavior: 'smooth' });
+});
+
+const render = () => {
+  document.getElementById('features-list').innerHTML = product.features.map(f => `<li>${f}</li>`).join('');
+  document.getElementById('addons-list').innerHTML = addOns.map(a => `
+    <div class="addon">
+      <div class="info">
+        <h4>${a.name}</h4>
+        <p>${a.description}</p>
+        <div style="font-weight:800;">+${dollars(a.price)}</div>
+      </div>
+      <label style="display:flex;align-items:center;margin:0;">
+        <input type="checkbox" value="${a.id}" name="addon" /> Include
+      </label>
+    </div>
+  `).join('');
+};
+
+const updateBadge = () => {
+  document.getElementById('badge').textContent = getCartCount();
+};
+
+render();
+load();
+updateBadge();
+
+// Keep badge live if cart changes from another tab
+STORE.subscribe(() => updateBadge());
+</script>
+</body>
+</html>
