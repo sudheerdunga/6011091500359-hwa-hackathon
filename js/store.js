@@ -52,7 +52,7 @@ const STORE = (() => {
   };
 
   const normalize = () => {
-    cart = cart.filter(item => item && item.qty && item.qty > 0);
+    cart = cart.filter(item => item && item.qty && item.qty > 0 && item.base && item.size && item.scent);
     cart.forEach(item => {
       if (!item.qty || item.qty < 1) item.qty = 1;
     });
@@ -78,19 +78,19 @@ const STORE = (() => {
     return (b ? b.price : 0) + (s ? s.price : 0) + (sc ? sc.price : 0);
   };
 
-  const itemLineTotal = (item) => variantPrice(item.baseId, item.sizeId, item.scentId) * item.qty;
+  const itemLineTotal = (item) => variantPrice(item.base, item.size, item.scent) * item.qty;
 
   const variantLabel = (item) => {
-    const b = product.variants.base.find(x => x.id === item.baseId);
-    const s = product.variants.size.find(x => x.id === item.sizeId);
-    const sc = product.variants.scent.find(x => x.id === item.scentId);
-    return `${b ? b.name : item.baseId} &bull; ${s ? s.name : item.sizeId} &bull; ${sc ? sc.name : item.scentId}`;
+    const b = product.variants.base.find(x => x.id === item.base);
+    const s = product.variants.size.find(x => x.id === item.size);
+    const sc = product.variants.scent.find(x => x.id === item.scent);
+    return `${b ? b.name : item.base} &bull; ${s ? s.name : item.size} &bull; ${sc ? sc.name : item.scent}`;
   };
 
-  const addOrUpdate = ({ baseId, sizeId, scentId }) => {
-    const existing = cart.find(i => i.baseId === baseId && i.sizeId === sizeId && i.scentId === scentId);
+  const addOrUpdate = ({ base, size, scent }) => {
+    const existing = cart.find(i => i.base === base && i.size === size && i.scent === scent);
     if (existing) { existing.qty += 1; }
-    else { cart.push({ baseId, sizeId, scentId, qty: 1 }); }
+    else { cart.push({ base, size, scent, qty: 1 }); }
     normalize(); save(); notify();
     return cart;
   };
