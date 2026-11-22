@@ -3,6 +3,14 @@ const path = require('path');
 
 const ORDERS_FILE = path.join(__dirname, 'orders.json');
 
+// Source of truth for pricing (mirrors the frontend store).
+const PRODUCT_PRICE = 8900;
+const ADDON_PRICES = {
+  warranty: 1900,
+  bulb: 1200,
+  mount: 2400
+};
+
 const readOrders = () => {
   try {
     if (!fs.existsSync(ORDERS_FILE)) return [];
@@ -34,8 +42,12 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify({ error: 'Method not allowed. Use POST.' }));
   }
 
-  let body = '';
-  for await (const chunk of req) body += chunk;
+  const body = await new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', (c) => chunks.push(c));
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    req.on('error', reject);
+  });
 
   let order;
   try { order = JSON.parse(body); } catch (e) {
@@ -85,19 +97,19 @@ module.exports = async (req, res) => {
       res.statusCode = 400;
       return res.end(JSON.stringify({ error: 'Each item qty must be 1-99.' }));
     }
-    const unit = Number(it.unitPrice);
-    if (!unit || unit < 0) {
-      res.statusCode = 400;
-      return res.end(JSON.stringify({ error: 'Each item unitPrice must be a positive number.' }));
-    }
-    computed += unit * qty;
+    // Authoritative server-side pricing; ignore client-supplied unitPrice.
+    computed += PRODUCT_PRICE * qty;
     if (Array.isArray(it.addOnIds)) {
       for (const aid of it.addOnIds) {
-        if (typeof aid !== 'string' || !aid) {
+        if (typeof aid !== 'string' || !aid || !(aid in ADDON_PRICES)) {
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: 'Invalid addOnIds.' }));
         }
+        computed += ADDON_PRICES[aid] * qty;
       }
+    } else {
+      res.statusCode = 400;
+      return res.end(JSON.stringify({ error: 'Each item addOnIds must be an array.' }));
     }
   }
 
@@ -111,7 +123,13 @@ module.exports = async (req, res) => {
   const record = {
     orderId,
     customer: { name: String(name).trim(), email: String(email).trim(), address: String(address).trim() },
-    items,
+    items: items.map(it => ({
+      productId: it.productId,
+      name: it.name,
+      qty: Number(it.qty),
+      unitPrice: PRODUCT_PRICE,
+      addOnIds: it.addOnIds
+    })),
     total: computed,
     status: 'confirmed',
     createdAt: new Date().toISOString()
