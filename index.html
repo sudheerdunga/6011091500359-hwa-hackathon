@@ -18,15 +18,15 @@
 
 <section class="hero">
   <div class="container">
-    <div class="img-placeholder" id="labyrinth-img" style="height:360px;">
-      <img src="images/Scent-Trail &amp; Micro Kibble Foraging Labryinth Product Image.webp" alt="Scent-Trail Foraging Labyrinth" style="width:100%;height:100%;object-fit:cover;border-radius:12px;display:block;">
+    <div class="product-media">
+      <img src="images/Scent-Trail &amp; Micro Kibble Foraging Labryinth Product Image.webp" alt="Scent-Trail Foraging Labyrinth" class="product-image">
     </div>
     <h1 id="product-name">Scent-Trail &amp; Micro-Kibble Foraging Labyrinth</h1>
     <p class="tagline" id="product-tagline">Keeps your dog happily busy while you&rsquo;re away.</p>
     <div class="price" id="product-price">$49.00</div>
-    <p id="product-desc" style="color:var(--muted);max-width:560px;margin:0 auto 1.75rem;">A scent-driven foraging puzzle that turns mealtime into a long, rewarding hunt. Choose your base labyrinth, your dog&rsquo;s size and play pace, and a scent cartridge pack to match.</p>
+    <p id="product-desc" class="product-desc">A scent-driven foraging puzzle that turns mealtime into a long, rewarding hunt. Choose your base labyrinth, your dog&rsquo;s size and play pace, and a scent cartridge pack to match.</p>
 
-    <div class="configurator card" style="max-width:720px;margin:0 auto 1.5rem;">
+    <div class="configurator card">
       <div class="config-group">
         <h3>1. Base &amp; Pod Tier</h3>
         <div class="variant-grid" id="base-options"></div>
@@ -41,14 +41,15 @@
       </div>
     </div>
 
-    <div class="price-summary" style="margin:1rem 0 0.75rem;text-align:center;">
-      <div style="font-size:0.95rem;color:var(--muted);">Selected configuration:</div>
-      <div id="config-label" style="font-weight:800;color:var(--ink);font-size:1.05rem;">Standard Labyrinth • Medium/Curious • Roasted Peanut</div>
-      <div id="config-breakdown" style="font-size:0.85rem;color:var(--muted);margin-top:0.25rem;"></div>
+    <div class="price-summary">
+      <div class="summary-label">Selected configuration:</div>
+      <div id="config-label" class="summary-value">Standard Labyrinth • Medium/Curious • Roasted Peanut</div>
+      <div id="config-breakdown" class="summary-breakdown"></div>
     </div>
-    <div style="margin-top:1.25rem;display:flex;flex-direction:column;gap:0.75rem;align-items:center;">
-      <button class="btn-primary" id="add-to-cart" style="width:100%;max-width:320px;">Add to cart</button>
-      <a href="cart.html" style="width:100%;max-width:320px;background:#fff;border:1px solid var(--line);color:var(--ink);padding:0.9rem 1.25rem;border-radius:var(--radius);font-weight:700;text-align:center;text-decoration:none;">View cart <span class="cart-badge" id="badge-inline">0</span></a>
+
+    <div class="cta-group">
+      <button class="btn-primary" id="add-to-cart">Add to cart</button>
+      <a href="cart.html" class="btn-outline">View cart <span class="cart-badge" id="badge-inline">0</span></a>
     </div>
   </div>
 </section>
