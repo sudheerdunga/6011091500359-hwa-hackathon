@@ -9,3 +9,6 @@ hwa-start.*
 .DS_Store
 dist/
 .vercel
+
+# runtime order artifacts
+api/orders.json
