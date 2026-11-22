@@ -1,7 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const ORDERS_FILE = path.join(__dirname, 'orders.json');
+const ORDERS_FILE = process.env.VERCEL === '1'
+  ? '/tmp/orders.json'
+  : path.join(__dirname, 'orders.json');
 
 // Source of truth for pricing (mirrors the frontend store).
 const PRODUCT_PRICE = 8900;
