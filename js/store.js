@@ -9,10 +9,11 @@ const STORE = (() => {
     description: 'A scent-driven foraging puzzle that turns mealtime into a long, rewarding hunt. Choose your base labyrinth, your dog\'s size and play pace, and a scent cartridge pack to match.',
     image: null,
     features: [
-      'Scent trails and micro-kibble hiding keep dogs engaged for hours',
-      'Interactive pod walls and slides for sniffing, nudging, and problem-solving',
-      'Base labyrinth in three sizes for every home and appetite',
-      'Wall thickness and slide resistance tuned to your dog\'s size and pace',
+      'Scent trails and hidden micro-kibble tap into your dog’s natural foraging instinct',
+      'Slow-rewarding pods stretch mealtime into a long, satisfying hunt',
+      'Sniffing and problem-solving tire your dog out while you are away',
+      'Three labyrinth sizes for every home and appetite',
+      'Wall thickness and slide resistance tuned to your dog’s size and play pace',
       'Swap-in scent cartridges: Roasted Peanut, Savory Broth, Calming Herb, or Variety 3-Pack',
       'Easy to refill, easy to clean, built for daily use'
     ],
