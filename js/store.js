@@ -10,8 +10,8 @@ const STORE = (() => {
     image: null,
     features: [
       'Scent trails and hidden micro-kibble tap into your dog’s natural foraging instinct',
-      'Slow-rewarding pods stretch mealtime into a long, satisfying hunt',
-      'Sniffing and problem-solving tire your dog out while you are away',
+      'Slow-rewarding pods stretch mealtime into a long, satisfying hunt while you are away',
+      'Sniffing, nudging, and problem-solving tire your dog out for hours',
       'Three labyrinth sizes for every home and appetite',
       'Wall thickness and slide resistance tuned to your dog’s size and play pace',
       'Swap-in scent cartridges: Roasted Peanut, Savory Broth, Calming Herb, or Variety 3-Pack',

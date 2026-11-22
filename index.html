@@ -41,8 +41,10 @@
       </div>
     </div>
 
-    <div class="price-summary" style="margin:1rem 0 0.5rem;text-align:center;color:var(--muted);font-size:0.95rem;">
-      Selected configuration: <span id="config-label">Standard Labyrinth • Medium/Curious • Roasted Peanut</span>
+    <div class="price-summary" style="margin:1rem 0 0.75rem;text-align:center;">
+      <div style="font-size:0.95rem;color:var(--muted);">Selected configuration:</div>
+      <div id="config-label" style="font-weight:800;color:var(--ink);font-size:1.05rem;">Standard Labyrinth • Medium/Curious • Roasted Peanut</div>
+      <div id="config-breakdown" style="font-size:0.85rem;color:var(--muted);margin-top:0.25rem;"></div>
     </div>
     <div style="margin-top:1.25rem;display:flex;flex-direction:column;gap:0.75rem;align-items:center;">
       <button class="btn-primary" id="add-to-cart" style="width:100%;max-width:320px;">Add to cart</button>
@@ -69,11 +71,6 @@ const { product, dollars, addOrUpdate, getCartCount, load, subscribe, variantPri
 
 const state = { base: 'standard', size: 'medium', scent: 'peanut' };
 
-const productEl = document.getElementById('product-name');
-const taglineEl = document.getElementById('product-tagline');
-const priceEl = document.getElementById('product-price');
-const descEl = document.getElementById('product-desc');
-
 const renderOptions = (containerId, groupId) => {
   const group = product.variants[groupId];
   const container = document.getElementById(containerId);
@@ -95,7 +92,8 @@ const updatePrice = () => {
   const b = product.variants.base.find(x => x.id === state.base);
   const s = product.variants.size.find(x => x.id === state.size);
   const sc = product.variants.scent.find(x => x.id === state.scent);
-  document.getElementById('config-label').textContent = `${b.name} • ${s.name} • ${sc.name}`;
+  if (configLabelEl) configLabelEl.textContent = `${b.name} • ${s.name} • ${sc.name}`;
+  if (configBreakdownEl) configBreakdownEl.textContent = `${b.name} ${dollars(b.price)} &bull; ${s.name} ${s.price === 0 ? 'included' : dollars(s.price)} &bull; ${sc.name} ${dollars(sc.price)} &bull; Total ${dollars(total)}`;
 };
 
 const selectVariant = (groupId, id) => {
@@ -107,44 +105,56 @@ const selectVariant = (groupId, id) => {
 };
 
 const init = () => {
-  productEl.textContent = product.name;
-  taglineEl.textContent = product.tagline;
-  descEl.textContent = product.description;
+  if (productEl) productEl.textContent = product.name;
+  if (taglineEl) taglineEl.textContent = product.tagline;
+  if (descEl) descEl.textContent = product.description;
   renderOptions('base-options', 'base');
   renderOptions('size-options', 'size');
   renderOptions('scent-options', 'scent');
   updatePrice();
 
-  document.getElementById('base-options').addEventListener('click', (e) => {
-    const card = e.target.closest('[data-group="base"]');
-    if (card) selectVariant('base', card.getAttribute('data-id'));
-  });
-  document.getElementById('size-options').addEventListener('click', (e) => {
-    const card = e.target.closest('[data-group="size"]');
-    if (card) selectVariant('size', card.getAttribute('data-id'));
-  });
-  document.getElementById('scent-options').addEventListener('click', (e) => {
-    const card = e.target.closest('[data-group="scent"]');
-    if (card) selectVariant('scent', card.getAttribute('data-id'));
-  });
+  const wire = (containerId, groupId) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.addEventListener('click', (e) => {
+      const card = e.target.closest('[data-group]');
+      if (!card) return;
+      selectVariant(card.getAttribute('data-group'), card.getAttribute('data-id'));
+    });
+  };
+  wire('base-options', 'base');
+  wire('size-options', 'size');
+  wire('scent-options', 'scent');
 
-  document.getElementById('add-to-cart').addEventListener('click', () => {
-    addOrUpdate({ base: state.base, size: state.size, scent: state.scent });
-    updateBadge();
-    const btn = document.getElementById('add-to-cart');
-    const old = btn.textContent;
-    btn.textContent = 'Added!';
-    setTimeout(() => btn.textContent = old, 1200);
-  });
+  const addBtn = document.getElementById('add-to-cart');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      addOrUpdate({ base: state.base, size: state.size, scent: state.scent });
+      updateBadge();
+      const old = addBtn.textContent;
+      addBtn.textContent = 'Added!';
+      addBtn.disabled = true;
+      setTimeout(() => { addBtn.textContent = old; addBtn.disabled = false; }, 1200);
+    });
+  }
 
   const updateBadge = () => {
     const count = getCartCount();
-    document.getElementById('badge').textContent = count;
-    document.getElementById('badge-inline').textContent = count;
+    if (badgeEl) badgeEl.textContent = count;
+    if (badgeInlineEl) badgeInlineEl.textContent = count;
   };
   updateBadge();
   subscribe(updateBadge);
 };
+
+const productEl = document.getElementById('product-name');
+const taglineEl = document.getElementById('product-tagline');
+const priceEl = document.getElementById('product-price');
+const descEl = document.getElementById('product-desc');
+const configLabelEl = document.getElementById('config-label');
+const configBreakdownEl = document.getElementById('config-breakdown');
+const badgeEl = document.getElementById('badge');
+const badgeInlineEl = document.getElementById('badge-inline');
 
 renderFeatures();
 load();
