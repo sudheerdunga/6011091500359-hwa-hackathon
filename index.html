@@ -18,38 +18,42 @@
 
 <section class="hero">
   <div class="container">
-    <div class="product-media">
-      <img src="images/Scent-Trail &amp; Micro Kibble Foraging Labryinth Product Image.webp" alt="Scent-Trail Foraging Labyrinth" class="product-image">
-    </div>
-    <h1 id="product-name">Scent-Trail &amp; Micro-Kibble Foraging Labyrinth</h1>
-    <p class="tagline" id="product-tagline">Keeps your dog happily busy while you&rsquo;re away.</p>
-    <div class="price" id="product-price">$49.00</div>
-    <p id="product-desc" class="product-desc">A scent-driven foraging puzzle that turns mealtime into a long, rewarding hunt. Choose your base labyrinth, your dog&rsquo;s size and play pace, and a scent cartridge pack to match.</p>
-
-    <div class="configurator card">
-      <div class="config-group">
-        <h3>1. Base &amp; Pod Tier</h3>
-        <div class="variant-grid" id="base-options"></div>
+    <div class="hero-grid">
+      <div class="hero-image">
+        <img src="images/Scent-Trail &amp; Micro Kibble Foraging Labryinth Product Image.webp" alt="Scent-Trail Foraging Labyrinth" class="product-image">
       </div>
-      <div class="config-group">
-        <h3>2. Dog Size &amp; Play Pace</h3>
-        <div class="variant-grid" id="size-options"></div>
-      </div>
-      <div class="config-group">
-        <h3>3. Scent Cartridge Pack (add-on)</h3>
-        <div class="variant-grid" id="scent-options"></div>
-      </div>
-    </div>
+      <div class="hero-content">
+        <h1 id="product-name">Scent-Trail &amp; Micro-Kibble Foraging Labyrinth</h1>
+        <p class="tagline" id="product-tagline">Keeps your dog happily busy while you&rsquo;re away.</p>
+        <div class="price" id="product-price">$49.00</div>
+        <p id="product-desc" class="product-desc">A scent-driven foraging puzzle that turns mealtime into a long, rewarding hunt. Choose your base labyrinth, your dog&rsquo;s size and play pace, and a scent cartridge pack to match.</p>
 
-    <div class="price-summary">
-      <div class="summary-label">Selected configuration:</div>
-      <div id="config-label" class="summary-value">Standard Labyrinth • Medium/Curious • Roasted Peanut</div>
-      <div id="config-breakdown" class="summary-breakdown"></div>
-    </div>
+        <div class="configurator card">
+          <div class="config-group">
+            <h3>1. Base &amp; Pod Tier</h3>
+            <div class="variant-grid" id="base-options"></div>
+          </div>
+          <div class="config-group">
+            <h3>2. Dog Size &amp; Play Pace</h3>
+            <div class="variant-grid" id="size-options"></div>
+          </div>
+          <div class="config-group">
+            <h3>3. Scent Cartridge Pack (add-on)</h3>
+            <div class="variant-grid" id="scent-options"></div>
+          </div>
+        </div>
 
-    <div class="cta-group">
-      <button class="btn-primary" id="add-to-cart">Add to cart</button>
-      <a href="cart.html" class="btn-outline">View cart <span class="cart-badge" id="badge-inline">0</span></a>
+        <div class="price-summary">
+          <div class="summary-label">Selected configuration:</div>
+          <div id="config-label" class="summary-value">Standard Labyrinth • Medium/Curious • Roasted Peanut</div>
+          <div id="config-breakdown" class="summary-breakdown"></div>
+        </div>
+
+        <div class="cta-group">
+          <button class="btn-primary" id="add-to-cart">Add to cart</button>
+          <a href="cart.html" class="btn-outline">View cart <span class="cart-badge" id="badge-inline">0</span></a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -87,7 +91,7 @@ const renderOptions = (containerId, groupId) => {
       <div class="variant-card${active}" data-group="${groupId}" data-id="${v.id}">
         <div class="variant-name">${v.name}</div>
         <div class="variant-desc">${v.desc}</div>
-        <div style="font-weight:800;color:var(--brand);margin-top:auto;">${v.price === 0 ? 'Included' : '+' + dollars(v.price)}</div>
+        <div class="variant-price">${v.price === 0 ? 'Included' : '+' + dollars(v.price)}</div>
       </div>
     `;
   }).join('');
@@ -99,7 +103,7 @@ const updatePrice = () => {
   const b = product.variants.base.find(x => x.id === state.base);
   const s = product.variants.size.find(x => x.id === state.size);
   const sc = product.variants.scent.find(x => x.id === state.scent);
-  if (configLabelEl) configLabelEl.textContent = `${b.name} • ${s.name} • ${sc.name}`;
+  if (configLabelEl) configLabelEl.textContent = `${b.name} &bull; ${s.name} &bull; ${sc.name}`;
   if (configBreakdownEl) configBreakdownEl.textContent = `${b.name} ${dollars(b.price)} &bull; ${s.name} ${s.price === 0 ? 'included' : dollars(s.price)} &bull; ${sc.name} ${dollars(sc.price)} &bull; Total ${dollars(total)}`;
 };
 
